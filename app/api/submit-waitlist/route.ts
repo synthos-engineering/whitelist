@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server"
 import nodemailer from "nodemailer"
+import connectDB from "@/app/lib/mongodb"
+import Waitlist from "@/app/models/Waitlist"
 
 // Create transporter with more detailed configuration
 const transporter = nodemailer.createTransport({
@@ -23,15 +25,35 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid email address" }, { status: 400 })
     }
 
+    // Connect to MongoDB
+    await connectDB()
+
+    // Check if email already exists
+    const existingEntry = await Waitlist.findOne({ email })
+    if (existingEntry) {
+      return NextResponse.json(
+        { error: "This email is already registered" },
+        { status: 400 }
+      )
+    }
+
+    // Create new waitlist entry
+    const waitlistEntry = new Waitlist({
+      email,
+      occupation,
+      platform
+    })
+
+    // Save to database
+    await waitlistEntry.save()
+    console.log("Saved to database:", waitlistEntry)
+
     // Log the attempt
     console.log("Attempting to send email to:", email)
     console.log("Using email config:", {
       user: process.env.EMAIL_USER,
       hasPassword: !!process.env.EMAIL_APP_PASSWORD
     })
-
-    // Store in database (you can replace this with your actual database logic)
-    console.log("Storing submission:", { email, occupation, platform })
 
     // Send confirmation email
     const mailOptions = {
@@ -101,7 +123,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true })
   } catch (error: any) {
-    console.error("Detailed error in email sending:", error)
+    console.error("Detailed error in submission:", error)
     return NextResponse.json(
       { error: "Failed to process submission", details: error.message },
       { status: 500 }
