@@ -103,25 +103,22 @@ export default function LandingPage() {
       const finalOccupation = occupation === "other" ? customOccupation : occupation
       const finalPlatform = platform === "other" ? customPlatform : platform
 
-      // Simulate API call with a delay
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const response = await fetch("/api/submit-waitlist", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          occupation: finalOccupation,
+          platform: finalPlatform,
+        }),
+      })
 
-      // Simulate successful response
-      // const response = await fetch("/api/submit-waitlist", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify({
-      //     email,
-      //     occupation: finalOccupation,
-      //     platform: finalPlatform,
-      //   }),
-      // })
-
-      // if (!response.ok) {
-      //   throw new Error("Failed to submit")
-      // }
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.message || "Failed to submit")
+      }
 
       toast({
         title: "Success!",
@@ -142,7 +139,7 @@ export default function LandingPage() {
       console.error("Submission error:", error)
       toast({
         title: "Something went wrong",
-        description: "Please try again later",
+        description: error instanceof Error ? error.message : "Please try again later",
         variant: "destructive",
       })
     } finally {
@@ -223,14 +220,6 @@ export default function LandingPage() {
           </div>
         </header>
 
-        {/* Funding Announcement */}
-        <div className="mb-8 md:mb-12 text-center">
-          <div className="inline-flex items-center px-4 py-2 md:px-5 md:py-2.5 rounded-full bg-purple-100 text-purple-700 text-xs md:text-sm font-medium">
-            <span className="mr-2">💫</span>
-            We've raised a $1.2M pre-seed led by Abstract Ventures.
-          </div>
-        </div>
-
         <div className="grid lg:grid-cols-2 gap-12 md:gap-16 max-w-6xl mx-auto">
           <div>
             {/* Main Heading and Subheading */}
@@ -265,7 +254,7 @@ export default function LandingPage() {
                       <div className="flex items-center">
                         <div
                           className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-medium transition-colors duration-300 ${
-                            currentStep === "email" ? "bg-purple-600 text-white" : "bg-purple-100 text-purple-600"
+                            currentStep === "email" ? "bg-purple-600 text-white" : "bg-purple-600 text-white"
                           }`}
                         >
                           1
@@ -374,24 +363,29 @@ export default function LandingPage() {
                   </p>
                   <div className="space-y-4 w-full max-w-sm">
                     <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                      <h4 className="text-sm font-medium text-gray-700 mb-2">Share with friends</h4>
-                      <div className="flex gap-3">
+                      <h4 className="text-sm font-medium text-gray-700 mb-2">Spread the Word! 🚀</h4>
+                      <div className="flex flex-col gap-3">
                         <Link
                           href={`https://twitter.com/intent/tweet?text=I just joined the waitlist for Synthos - AI Agents for DeFi! Join me: https://synthos.ai`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="bg-white hover:bg-purple-50 p-2 rounded-md transition-colors"
+                          className="bg-white hover:bg-purple-50 p-2 rounded-md transition-colors flex items-center gap-2"
                         >
                           <Twitter className="w-5 h-5 text-purple-600" />
+                          <span className="text-sm text-gray-700">Share on X</span>
                         </Link>
-                        <Link
-                          href={`https://t.me/share/url?url=https://synthos.ai&text=I just joined the waitlist for Synthos - AI Agents for DeFi! Join me:`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="bg-white hover:bg-purple-50 p-2 rounded-md transition-colors"
-                        >
-                          <Send className="w-5 h-5 text-purple-600" />
-                        </Link>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-gray-700">Be with the ALPHA:</span>
+                          <Link
+                            href="https://t.me/+VQtBZ5QIoacxZjZl"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="bg-white hover:bg-purple-50 p-2 rounded-md transition-colors flex items-center gap-2"
+                          >
+                            <Send className="w-5 h-5 text-purple-600" />
+                            <span className="text-sm text-gray-700">Telegram</span>
+                          </Link>
+                        </div>
                       </div>
                     </div>
                     <Button

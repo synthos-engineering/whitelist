@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { ArrowLeft, ArrowRight } from "lucide-react"
+import { toast } from "@/components/ui/use-toast"
 
 interface PlatformFormProps {
   platform: string
@@ -38,21 +39,88 @@ export default function PlatformForm({
   onBack,
   isSubmitting,
 }: PlatformFormProps) {
+  const validateForm = () => {
+    if (!platform) {
+      // Add haptic feedback
+      if (navigator.vibrate) {
+        navigator.vibrate(200)
+      }
+
+      toast({
+        title: "Please select a platform",
+        description: "Select your preferred platform or choose 'Other' to specify",
+        variant: "destructive",
+        duration: 3000,
+      })
+      return false
+    }
+
+    if (platform === "other" && !customPlatform.trim()) {
+      // Add haptic feedback
+      if (navigator.vibrate) {
+        navigator.vibrate(200)
+      }
+
+      toast({
+        title: "Please specify your platform",
+        description: "Enter your preferred platform in the field provided",
+        variant: "destructive",
+        duration: 3000,
+      })
+      return false
+    }
+
+    return true
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!validateForm()) {
+      return
+    }
+
+    onSubmit(e)
+  }
+
+  const handleBack = () => {
+    // Clear the form state when going back
+    setPlatform("")
+    setCustomPlatform("")
+    onBack()
+  }
+
   return (
-    <form onSubmit={onSubmit} className="space-y-4 md:space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
       <div className="space-y-3 md:space-y-4">
-        <Label htmlFor="platform" className="text-sm font-medium text-purple-200">
+        <Label htmlFor="platform" className="text-sm font-medium text-gray-700">
           Which platform would you like to use the most?
         </Label>
-        <RadioGroup id="platform" value={platform} onValueChange={setPlatform} className="space-y-2 md:space-y-3">
+        <RadioGroup 
+          id="platform" 
+          value={platform} 
+          onValueChange={(value) => {
+            setPlatform(value)
+            // Clear custom platform when switching away from "other"
+            if (value !== "other") {
+              setCustomPlatform("")
+            }
+          }} 
+          className="space-y-2 md:space-y-3"
+        >
           {platforms.map((item) => (
             <div key={item.value} className="flex items-center space-x-3">
               <RadioGroupItem
                 value={item.value}
                 id={`platform-${item.value}`}
-                className="text-purple-400 border-purple-700"
+                className="text-gray-900 border-gray-400"
               />
-              <Label htmlFor={`platform-${item.value}`} className="cursor-pointer text-purple-100 text-sm md:text-base">
+              <Label 
+                htmlFor={`platform-${item.value}`} 
+                className={`cursor-pointer text-sm md:text-base ${
+                  platform === item.value ? 'text-gray-900 font-medium' : 'text-gray-500'
+                }`}
+              >
                 {item.label}
               </Label>
             </div>
@@ -66,7 +134,8 @@ export default function PlatformForm({
               placeholder="Please specify your preferred platform"
               value={customPlatform}
               onChange={(e) => setCustomPlatform(e.target.value)}
-              className="bg-[#1a103c] border-purple-800/50 focus:border-purple-500 h-10 md:h-12 text-white placeholder:text-purple-400/50 rounded-lg"
+              className="bg-white border-gray-200 focus:border-gray-400 h-10 md:h-12 text-gray-900 placeholder:text-gray-400 rounded-lg"
+              required={platform === "other"}
             />
           </div>
         )}
@@ -76,8 +145,8 @@ export default function PlatformForm({
         <Button
           type="button"
           variant="outline"
-          onClick={onBack}
-          className="border-purple-800/50 text-purple-200 hover:bg-purple-800/30 px-3 md:px-6 py-2 rounded-lg transition-all duration-300 text-sm md:text-base"
+          onClick={handleBack}
+          className="border-gray-200 text-gray-700 hover:bg-gray-100 px-3 md:px-6 py-2 rounded-lg transition-all duration-300 text-sm md:text-base"
         >
           <ArrowLeft className="mr-1 md:mr-2 h-4 w-4" /> Back
         </Button>
