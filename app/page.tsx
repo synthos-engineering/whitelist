@@ -20,6 +20,13 @@ import { toast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import OccupationForm from "./components/occupation-form";
 import PlatformForm from "./components/platform-form";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 type FormStep = "email" | "occupation" | "platform" | "success";
 
@@ -35,6 +42,7 @@ export default function LandingPage() {
   const [logoError, setLogoError] = useState(false);
   const [submittedEmail, setSubmittedEmail] = useState("");
   const formCardRef = useRef<HTMLDivElement>(null);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -128,9 +136,10 @@ export default function LandingPage() {
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to submit");
+        throw new Error(data.error || data.details || "Failed to submit");
       }
 
       toast({
@@ -141,7 +150,7 @@ export default function LandingPage() {
 
       // Store the submitted email for the success screen
       setSubmittedEmail(email);
-      setCurrentStep("success");
+      setShowSuccessDialog(true);
 
       // Show additional toast
       toast({
@@ -151,9 +160,8 @@ export default function LandingPage() {
     } catch (error) {
       console.error("Submission error:", error);
       toast({
-        title: "Something went wrong",
-        description:
-          error instanceof Error ? error.message : "Please try again later",
+        title: "Connection Error",
+        description: "Unable to connect to the server. Please try again later.",
         variant: "destructive",
       });
     } finally {
@@ -167,7 +175,7 @@ export default function LandingPage() {
     setCustomOccupation("");
     setPlatform("");
     setCustomPlatform("");
-    setCurrentStep("email");
+    setShowSuccessDialog(false);
   };
 
   const goBack = () => {
@@ -380,71 +388,74 @@ export default function LandingPage() {
                     )}
                   </div>
                 </>
-              ) : (
-                /* Success Screen */
-                <div className="flex flex-col items-center justify-center py-4 md:py-6">
-                  <div className="w-16 h-16 md:w-20 md:h-20 bg-green-100 rounded-full flex items-center justify-center mb-6">
-                    <CheckCircle className="w-10 h-10 md:w-12 md:h-12 text-green-600" />
-                  </div>
-                  <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-2 text-center">
-                    Thank You!
-                  </h3>
-                  <p className="text-gray-600 text-center mb-6 max-w-md">
-                    We've added{" "}
-                    <span className="text-gray-900 font-medium">
-                      {submittedEmail}
-                    </span>{" "}
-                    to our early access list. We'll notify you when Synthos
-                    launches.
-                  </p>
-                  <div className="space-y-4 w-full max-w-sm">
-                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                      <h4 className="text-sm font-medium text-gray-700 mb-2">
-                        Spread the Word! 🚀
-                      </h4>
-                      <div className="flex flex-col gap-3">
-                        <Link
-                          href={`https://twitter.com/intent/tweet?text=I just joined the waitlist for Synthos - AI Agents for DeFi! Join me: https://synthos.ai`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="bg-white hover:bg-purple-50 p-2 rounded-md transition-colors flex items-center gap-2"
-                        >
-                          <Twitter className="w-5 h-5 text-purple-600" />
-                          <span className="text-sm text-gray-700">
-                            Share on X
-                          </span>
-                        </Link>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-gray-700">
-                            Be with the ALPHA:
-                          </span>
-                          <Link
-                            href="https://t.me/+VQtBZ5QIoacxZjZl"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="bg-white hover:bg-purple-50 p-2 rounded-md transition-colors flex items-center gap-2"
-                          >
-                            <Send className="w-5 h-5 text-purple-600" />
-                            <span className="text-sm text-gray-700">
-                              Telegram
-                            </span>
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                    <Button
-                      onClick={resetForm}
-                      className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg transition-all duration-300"
-                    >
-                      Sign up with another email
-                    </Button>
-                  </div>
-                </div>
-              )}
+              ) : null}
             </div>
           </div>
         </div>
       </div>
+
+      {/* Success Dialog */}
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center text-2xl font-bold text-gray-900">
+              Thank You!
+            </DialogTitle>
+            <DialogDescription className="text-center">
+              <div className="w-16 h-16 md:w-20 md:h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <CheckCircle className="w-10 h-10 md:w-12 md:h-12 text-green-600" />
+              </div>
+              <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                We've added{" "}
+                <span className="text-gray-900 font-medium">
+                  {submittedEmail}
+                </span>{" "}
+                to our early access list. We'll notify you when Synthos
+                launches.
+              </p>
+              <div className="space-y-4 w-full max-w-sm mx-auto">
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">
+                    Spread the Word! 🚀
+                  </h4>
+                  <div className="flex flex-col gap-3">
+                    <Link
+                      href={`https://twitter.com/intent/tweet?text=I just joined the waitlist for Synthos - AI Agents for DeFi! Join me: https://synthos.ai`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-white hover:bg-purple-50 p-2 rounded-md transition-colors flex items-center gap-2"
+                    >
+                      <Twitter className="w-5 h-5 text-purple-600" />
+                      <span className="text-sm text-gray-700">Share on X</span>
+                    </Link>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-700">
+                        Be with the ALPHA:
+                      </span>
+                      <Link
+                        href="https://t.me/+VQtBZ5QIoacxZjZl"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-white hover:bg-purple-50 p-2 rounded-md transition-colors flex items-center gap-2"
+                      >
+                        <Send className="w-5 h-5 text-purple-600" />
+                        <span className="text-sm text-gray-700">Telegram</span>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+                <Button
+                  onClick={resetForm}
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg transition-all duration-300"
+                >
+                  Sign up with another email
+                </Button>
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+
       <footer className="fixed bottom-0 left-0 right-0 bg-gray-100/90 backdrop-blur-sm border-t-2 border-gray-300 z-50">
         <div className="container mx-auto px-4 py-3">
           <p className="text-center text-xs md:text-sm text-gray-500">

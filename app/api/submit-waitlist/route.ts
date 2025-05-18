@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server"
-import nodemailer from "nodemailer"
-import connectDB from "@/app/lib/mongodb"
-import Waitlist from "@/app/models/Waitlist"
+import { NextResponse } from "next/server";
+import nodemailer from "nodemailer";
+import connectDB from "@/app/lib/mongodb";
+import Waitlist from "@/app/models/Waitlist";
 
 // Create transporter with more detailed configuration
 const transporter = nodemailer.createTransport({
@@ -13,53 +13,91 @@ const transporter = nodemailer.createTransport({
     pass: process.env.EMAIL_APP_PASSWORD,
   },
   debug: true, // Enable debug logging
-  logger: true // Enable logger
-})
+  logger: true, // Enable logger
+});
 
 export async function POST(request: Request) {
   try {
-    const { email, occupation, platform } = await request.json()
+    const { email, occupation, platform } = await request.json();
 
     // Validate email
     if (!email || !email.includes("@")) {
-      return NextResponse.json({ error: "Invalid email address" }, { status: 400 })
+      return NextResponse.json(
+        { error: "Invalid email address" },
+        { status: 400 }
+      );
     }
 
     // Connect to MongoDB
-    await connectDB()
+    try {
+      await connectDB();
+    } catch (dbError) {
+      console.error("Database connection error:", dbError);
+      return NextResponse.json(
+        {
+          error: "Database connection error",
+          details: dbError instanceof Error ? dbError.message : "Unknown error",
+        },
+        { status: 500 }
+      );
+    }
 
     // Check if email already exists
-    const existingEntry = await Waitlist.findOne({ email })
-    if (existingEntry) {
+    try {
+      const existingEntry = await Waitlist.findOne({ email });
+      if (existingEntry) {
+        return NextResponse.json(
+          { error: "This email is already registered" },
+          { status: 400 }
+        );
+      }
+    } catch (queryError) {
+      console.error("Database query error:", queryError);
       return NextResponse.json(
-        { error: "This email is already registered" },
-        { status: 400 }
-      )
+        {
+          error: "Database query error",
+          details:
+            queryError instanceof Error ? queryError.message : "Unknown error",
+        },
+        { status: 500 }
+      );
     }
 
     // Create new waitlist entry
     const waitlistEntry = new Waitlist({
       email,
       occupation,
-      platform
-    })
+      platform,
+    });
 
     // Save to database
-    await waitlistEntry.save()
-    console.log("Saved to database:", waitlistEntry)
+    try {
+      await waitlistEntry.save();
+      console.log("Saved to database:", waitlistEntry);
+    } catch (saveError) {
+      console.error("Database save error:", saveError);
+      return NextResponse.json(
+        {
+          error: "Failed to save to database",
+          details:
+            saveError instanceof Error ? saveError.message : "Unknown error",
+        },
+        { status: 500 }
+      );
+    }
 
     // Log the attempt
-    console.log("Attempting to send email to:", email)
+    console.log("Attempting to send email to:", email);
     console.log("Using email config:", {
       user: process.env.EMAIL_USER,
-      hasPassword: !!process.env.EMAIL_APP_PASSWORD
-    })
+      hasPassword: !!process.env.EMAIL_APP_PASSWORD,
+    });
 
     // Send confirmation email
     const mailOptions = {
       from: {
         name: "SynthOS Team",
-        address: "noreply@synthos-engineering.com" // Use a no-reply address
+        address: "noreply@synthos-engineering.com", // Use a no-reply address
       },
       to: email, // This is the user's email from the form
       subject: "Welcome to SynthOS Waitlist! 🚀",
@@ -103,30 +141,51 @@ export async function POST(request: Request) {
           </div>
         </div>
       `,
-    }
+    };
 
     // Verify transporter configuration
     try {
-      await transporter.verify()
-      console.log("SMTP connection verified successfully")
+      await transporter.verify();
+      console.log("SMTP connection verified successfully");
     } catch (verifyError) {
-      console.error("SMTP verification failed:", verifyError)
+      console.error("SMTP verification failed:", verifyError);
       return NextResponse.json(
-        { error: "Email service configuration error" },
+        {
+          error: "Email service configuration error",
+          details:
+            verifyError instanceof Error
+              ? verifyError.message
+              : "Unknown error",
+        },
         { status: 500 }
-      )
+      );
     }
 
     // Send the email
-    const info = await transporter.sendMail(mailOptions)
-    console.log("Email sent successfully:", info)
+    try {
+      const info = await transporter.sendMail(mailOptions);
+      console.log("Email sent successfully:", info);
+    } catch (emailError) {
+      console.error("Email sending failed:", emailError);
+      return NextResponse.json(
+        {
+          error: "Failed to send confirmation email",
+          details:
+            emailError instanceof Error ? emailError.message : "Unknown error",
+        },
+        { status: 500 }
+      );
+    }
 
-    return NextResponse.json({ success: true })
-  } catch (error: any) {
-    console.error("Detailed error in submission:", error)
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Detailed error in submission:", error);
     return NextResponse.json(
-      { error: "Failed to process submission", details: error.message },
+      {
+        error: "Failed to process submission",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
-    )
+    );
   }
-} 
+}
