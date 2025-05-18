@@ -1,66 +1,77 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import Image from "next/image"
-import Link from "next/link"
-import { ArrowRight, Twitter, Send, BarChart4, ListFilter, Wallet, CheckCircle } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { toast } from "@/components/ui/use-toast"
-import { Toaster } from "@/components/ui/toaster"
-import CountdownTimer from "./components/countdown-timer"
-import OccupationForm from "./components/occupation-form"
-import PlatformForm from "./components/platform-form"
+import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import {
+  ArrowRight,
+  Twitter,
+  Send,
+  BarChart4,
+  ListFilter,
+  Wallet,
+  CheckCircle,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { toast } from "@/components/ui/use-toast";
+import { Toaster } from "@/components/ui/toaster";
+import OccupationForm from "./components/occupation-form";
+import PlatformForm from "./components/platform-form";
 
-type FormStep = "email" | "occupation" | "platform" | "success"
+type FormStep = "email" | "occupation" | "platform" | "success";
 
 export default function LandingPage() {
-  const [email, setEmail] = useState("")
-  const [occupation, setOccupation] = useState("")
-  const [customOccupation, setCustomOccupation] = useState("")
-  const [platform, setPlatform] = useState("")
-  const [customPlatform, setCustomPlatform] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [currentStep, setCurrentStep] = useState<FormStep>("email")
-  const [mounted, setMounted] = useState(false)
-  const [logoError, setLogoError] = useState(false)
-  const [submittedEmail, setSubmittedEmail] = useState("")
-
-  // Set launch date to May 22, 2025 (Malaysia time)
-  const launchDate = new Date("2025-05-22T00:00:00+08:00")
+  const [email, setEmail] = useState("");
+  const [occupation, setOccupation] = useState("");
+  const [customOccupation, setCustomOccupation] = useState("");
+  const [platform, setPlatform] = useState("");
+  const [customPlatform, setCustomPlatform] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentStep, setCurrentStep] = useState<FormStep>("email");
+  const [mounted, setMounted] = useState(false);
+  const [logoError, setLogoError] = useState(false);
+  const [submittedEmail, setSubmittedEmail] = useState("");
+  const formCardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
 
   const handleEmailSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!email || !email.includes("@")) {
+      if (formCardRef.current) {
+        formCardRef.current.classList.remove("animate-shake");
+        // Force reflow to restart animation
+        void formCardRef.current.offsetWidth;
+        formCardRef.current.classList.add("animate-shake");
+      }
       toast({
         title: "Invalid email",
         description: "Please enter a valid email address",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     // Move to occupation step
-    setCurrentStep("occupation")
-  }
+    setCurrentStep("occupation");
+  };
 
   const handleOccupationSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!occupation) {
       toast({
         title: "Please select an occupation",
         description: "Select your occupation or choose 'Other' to specify",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     if (occupation === "other" && !customOccupation) {
@@ -68,24 +79,25 @@ export default function LandingPage() {
         title: "Please specify your occupation",
         description: "Enter your occupation in the field provided",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     // Move to platform step
-    setCurrentStep("platform")
-  }
+    setCurrentStep("platform");
+  };
 
   const handlePlatformSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!platform) {
       toast({
         title: "Please select a platform",
-        description: "Select your preferred platform or choose 'Other' to specify",
+        description:
+          "Select your preferred platform or choose 'Other' to specify",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     if (platform === "other" && !customPlatform) {
@@ -93,15 +105,16 @@ export default function LandingPage() {
         title: "Please specify your platform",
         description: "Enter your preferred platform in the field provided",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
 
     try {
-      const finalOccupation = occupation === "other" ? customOccupation : occupation
-      const finalPlatform = platform === "other" ? customPlatform : platform
+      const finalOccupation =
+        occupation === "other" ? customOccupation : occupation;
+      const finalPlatform = platform === "other" ? customPlatform : platform;
 
       const response = await fetch("/api/submit-waitlist", {
         method: "POST",
@@ -113,59 +126,60 @@ export default function LandingPage() {
           occupation: finalOccupation,
           platform: finalPlatform,
         }),
-      })
+      });
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || "Failed to submit")
+        const error = await response.json();
+        throw new Error(error.message || "Failed to submit");
       }
 
       toast({
         title: "Success!",
-        description: "You've been added to our early access list. Check your email for confirmation!",
-      })
-      
+        description:
+          "You've been added to our early access list. Check your email for confirmation!",
+      });
+
       // Store the submitted email for the success screen
-      setSubmittedEmail(email)
-      setCurrentStep("success")
+      setSubmittedEmail(email);
+      setCurrentStep("success");
 
       // Show additional toast
       toast({
         title: "Welcome to Synthos!",
         description: "We're excited to have you join our early access program.",
-      })
-
+      });
     } catch (error) {
-      console.error("Submission error:", error)
+      console.error("Submission error:", error);
       toast({
         title: "Something went wrong",
-        description: error instanceof Error ? error.message : "Please try again later",
+        description:
+          error instanceof Error ? error.message : "Please try again later",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const resetForm = () => {
-    setEmail("")
-    setOccupation("")
-    setCustomOccupation("")
-    setPlatform("")
-    setCustomPlatform("")
-    setCurrentStep("email")
-  }
+    setEmail("");
+    setOccupation("");
+    setCustomOccupation("");
+    setPlatform("");
+    setCustomPlatform("");
+    setCurrentStep("email");
+  };
 
   const goBack = () => {
     if (currentStep === "occupation") {
-      setCurrentStep("email")
+      setCurrentStep("email");
     } else if (currentStep === "platform") {
-      setCurrentStep("occupation")
+      setCurrentStep("occupation");
     }
-  }
+  };
 
   return (
-    <div className="min-h-screen text-gray-800 relative overflow-hidden">
+    <div className="min-h-screen text-gray-800 relative overflow-hidden bg-gray-100">
       {/* Background decorative elements */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
         <div className="absolute top-0 right-0 w-96 h-96 bg-purple-100 rounded-full filter blur-3xl opacity-30 -translate-y-1/2 translate-x-1/3"></div>
@@ -173,79 +187,75 @@ export default function LandingPage() {
       </div>
 
       <Toaster />
-      <div className="container mx-auto px-4 py-6 md:py-8 relative z-10">
+      <div className="container mx-auto px-4 relative z-10 min-h-screen flex flex-col justify-center">
         {/* Header */}
-        <header className="flex justify-between items-center mb-8 md:mb-12">
-          <div className="flex items-center gap-2 md:gap-3">
-            {logoError ? (
-              <div className="w-8 h-8 md:w-10 md:h-10 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold">
-                S
-              </div>
-            ) : (
-              <div className="w-8 h-8 md:w-10 md:h-10 relative">
-                <Image
-                  src="/synthos-logo.png"
-                  alt="Synthos Logo"
-                  fill
-                  sizes="(max-width: 768px) 32px, 40px"
-                  className="object-contain"
-                  priority
-                  onError={() => setLogoError(true)}
-                />
-              </div>
-            )}
-            <span className="text-lg md:text-xl font-bold text-gray-900">Synthos</span>
-          </div>
+        <header className="fixed top-0 left-0 right-0 bg-gray-100/90 backdrop-blur-sm border-b-2 border-gray-300 z-50">
+          <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div className="flex items-center">
+              {logoError ? (
+                <div className="w-12 h-12 md:w-16 md:h-16 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+                  S
+                </div>
+              ) : (
+                <div className="w-12 h-12 md:w-16 md:h-16 relative">
+                  <Image
+                    src="/synthos-logo.png"
+                    alt="Synthos Logo"
+                    fill
+                    sizes="(max-width: 768px) 48px"
+                    className="object-contain"
+                    priority
+                    onError={() => setLogoError(true)}
+                  />
+                </div>
+              )}
+              <span className="text-xl md:text-2xl font-bold text-gray-900">
+                Synthos
+              </span>
+            </div>
 
-          {/* Social Media Links */}
-          <div className="flex items-center gap-4">
-            <Link
-              href="https://x.com/SynthOS__"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-purple-600 hover:text-purple-700 transition-colors"
-              aria-label="Twitter"
-            >
-              <Twitter className="w-5 h-5" />
-            </Link>
-            <Link
-              href="https://t.me/+x8mewakKNJNmY2Nl"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-purple-600 hover:text-purple-700 transition-colors"
-              aria-label="Telegram"
-            >
-              <Send className="w-5 h-5" />
-            </Link>
+            {/* Social Media Links */}
+            <div className="flex items-center gap-4">
+              <Link
+                href="https://x.com/SynthOS__"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-purple-600 hover:text-purple-700 transition-colors"
+                aria-label="Twitter"
+              >
+                <Twitter className="w-5 h-5" />
+              </Link>
+              <Link
+                href="https://t.me/+x8mewakKNJNmY2Nl"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-purple-600 hover:text-purple-700 transition-colors"
+                aria-label="Telegram"
+              >
+                <Send className="w-5 h-5" />
+              </Link>
+            </div>
           </div>
         </header>
 
-        <div className="grid lg:grid-cols-2 gap-12 md:gap-16 max-w-6xl mx-auto">
-          <div>
+        <div className="grid max-w-2xl mx-auto w-full mt-24">
+          <div className="flex flex-col items-center text-center">
             {/* Main Heading and Subheading */}
             <div className="mb-10 md:mb-12">
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
                 AI Agents for DeFi
               </h1>
               <p className="text-lg md:text-xl text-gray-600">
-                Tailored investment strategies based on user preferences, ensuring data privacy and verifiability.
+                Tailored investment strategies based on user preferences,
+                ensuring data privacy and verifiability.
               </p>
             </div>
 
-            {/* Countdown Timer */}
-            <div className="mb-10 md:mb-12">
-              <h3 className="text-base md:text-lg font-medium text-gray-600 mb-4 md:mb-6">
-                <span className="inline-block px-3 py-1 md:px-4 md:py-1 bg-purple-100 rounded-full text-purple-700 mb-2 text-sm">
-                  Limited Early Access
-                </span>
-                <br />
-                Launching In:
-              </h3>
-              <CountdownTimer targetDate={launchDate} />
-            </div>
-
             {/* Form Card */}
-            <div className="bg-white rounded-2xl shadow-xl border border-purple-100 p-5 md:p-8 transition-all duration-300 hover:shadow-2xl">
+            <div
+              ref={formCardRef}
+              className="bg-white rounded-2xl shadow-xl border border-purple-100 p-5 md:p-8 transition-all duration-300 hover:shadow-2xl w-full"
+            >
               {currentStep !== "success" ? (
                 <>
                   {/* Form Progress Indicator */}
@@ -254,14 +264,18 @@ export default function LandingPage() {
                       <div className="flex items-center">
                         <div
                           className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-medium transition-colors duration-300 ${
-                            currentStep === "email" ? "bg-purple-600 text-white" : "bg-purple-600 text-white"
+                            currentStep === "email"
+                              ? "bg-purple-600 text-white"
+                              : "bg-purple-600 text-white"
                           }`}
                         >
                           1
                         </div>
                         <div
                           className={`w-8 md:w-16 h-1 transition-colors duration-300 ${
-                            currentStep === "email" ? "bg-purple-100" : "bg-purple-600"
+                            currentStep === "email"
+                              ? "bg-purple-100"
+                              : "bg-purple-600"
                           }`}
                         ></div>
                       </div>
@@ -271,22 +285,26 @@ export default function LandingPage() {
                             currentStep === "occupation"
                               ? "bg-purple-600 text-white"
                               : currentStep === "platform"
-                                ? "bg-purple-600 text-white"
-                                : "bg-purple-100 text-purple-600"
+                              ? "bg-purple-600 text-white"
+                              : "bg-purple-100 text-purple-600"
                           }`}
                         >
                           2
                         </div>
                         <div
                           className={`w-8 md:w-16 h-1 transition-colors duration-300 ${
-                            currentStep === "platform" ? "bg-purple-600" : "bg-purple-100"
+                            currentStep === "platform"
+                              ? "bg-purple-600"
+                              : "bg-purple-100"
                           }`}
                         ></div>
                       </div>
                       <div className="flex items-center">
                         <div
                           className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-medium transition-colors duration-300 ${
-                            currentStep === "platform" ? "bg-purple-600 text-white" : "bg-purple-100 text-purple-600"
+                            currentStep === "platform"
+                              ? "bg-purple-600 text-white"
+                              : "bg-purple-100 text-purple-600"
                           }`}
                         >
                           3
@@ -301,11 +319,21 @@ export default function LandingPage() {
                   </h3>
 
                   {/* Multi-step Form */}
-                  <div className={`transition-opacity duration-300 ${mounted ? "opacity-100" : "opacity-0"}`}>
+                  <div
+                    className={`transition-opacity duration-300 ${
+                      mounted ? "opacity-100" : "opacity-0"
+                    }`}
+                  >
                     {currentStep === "email" ? (
-                      <form onSubmit={handleEmailSubmit} className="space-y-4 md:space-y-6">
+                      <form
+                        onSubmit={handleEmailSubmit}
+                        className="space-y-4 md:space-y-6"
+                      >
                         <div className="space-y-2">
-                          <label htmlFor="email" className="text-sm font-medium text-gray-700">
+                          <label
+                            htmlFor="email"
+                            className="text-sm font-medium text-gray-700"
+                          >
                             Email Address
                           </label>
                           <Input
@@ -356,14 +384,22 @@ export default function LandingPage() {
                   <div className="w-16 h-16 md:w-20 md:h-20 bg-green-100 rounded-full flex items-center justify-center mb-6">
                     <CheckCircle className="w-10 h-10 md:w-12 md:h-12 text-green-600" />
                   </div>
-                  <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-2 text-center">Thank You!</h3>
+                  <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-2 text-center">
+                    Thank You!
+                  </h3>
                   <p className="text-gray-600 text-center mb-6 max-w-md">
-                    We've added <span className="text-gray-900 font-medium">{submittedEmail}</span> to our early access
-                    list. We'll notify you when Synthos launches.
+                    We've added{" "}
+                    <span className="text-gray-900 font-medium">
+                      {submittedEmail}
+                    </span>{" "}
+                    to our early access list. We'll notify you when Synthos
+                    launches.
                   </p>
                   <div className="space-y-4 w-full max-w-sm">
                     <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                      <h4 className="text-sm font-medium text-gray-700 mb-2">Spread the Word! 🚀</h4>
+                      <h4 className="text-sm font-medium text-gray-700 mb-2">
+                        Spread the Word! 🚀
+                      </h4>
                       <div className="flex flex-col gap-3">
                         <Link
                           href={`https://twitter.com/intent/tweet?text=I just joined the waitlist for Synthos - AI Agents for DeFi! Join me: https://synthos.ai`}
@@ -372,10 +408,14 @@ export default function LandingPage() {
                           className="bg-white hover:bg-purple-50 p-2 rounded-md transition-colors flex items-center gap-2"
                         >
                           <Twitter className="w-5 h-5 text-purple-600" />
-                          <span className="text-sm text-gray-700">Share on X</span>
+                          <span className="text-sm text-gray-700">
+                            Share on X
+                          </span>
                         </Link>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm text-gray-700">Be with the ALPHA:</span>
+                          <span className="text-sm text-gray-700">
+                            Be with the ALPHA:
+                          </span>
                           <Link
                             href="https://t.me/+VQtBZ5QIoacxZjZl"
                             target="_blank"
@@ -383,7 +423,9 @@ export default function LandingPage() {
                             className="bg-white hover:bg-purple-50 p-2 rounded-md transition-colors flex items-center gap-2"
                           >
                             <Send className="w-5 h-5 text-purple-600" />
-                            <span className="text-sm text-gray-700">Telegram</span>
+                            <span className="text-sm text-gray-700">
+                              Telegram
+                            </span>
                           </Link>
                         </div>
                       </div>
@@ -399,105 +441,15 @@ export default function LandingPage() {
               )}
             </div>
           </div>
-
-          {/* Workflow Visualization - Right Column */}
-          <div className="flex justify-center items-center">
-            <div className="relative max-w-sm">
-              {/* Vertical Line */}
-              <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-purple-200 -translate-x-1/2"></div>
-
-              {/* Start */}
-              <div className="relative mb-8">
-                <div className="bg-white rounded-2xl shadow-lg p-4 w-40 mx-auto text-center text-gray-900 font-medium border border-purple-100">
-                  Start
-                </div>
-                <div className="absolute left-1/2 bottom-0 w-0.5 h-8 bg-purple-200 -translate-x-1/2 translate-y-full"></div>
-              </div>
-
-              {/* Step 1: App */}
-              <div className="relative mb-8">
-                <div className="absolute left-1/2 bottom-0 w-0.5 h-8 bg-purple-200 -translate-x-1/2 translate-y-full"></div>
-                <div className="bg-white rounded-2xl shadow-lg p-4 w-72 mx-auto flex items-center border border-purple-100 relative overflow-hidden group hover:shadow-xl transition-all duration-300">
-                  <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-400"></div>
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 mr-4 ml-2">
-                      <BarChart4 className="h-5 w-5" />
-                    </div>
-                    <span className="text-gray-900 font-medium">App</span>
-                  </div>
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 font-bold text-sm">
-                    1
-                  </div>
-                </div>
-              </div>
-
-              {/* Step 2: DeFi Strategies */}
-              <div className="relative mb-8">
-                <div className="absolute left-1/2 bottom-0 w-0.5 h-8 bg-purple-200 -translate-x-1/2 translate-y-full"></div>
-                <div className="bg-white rounded-2xl shadow-lg p-4 w-72 mx-auto flex items-center border border-purple-100 relative overflow-hidden group hover:shadow-xl transition-all duration-300">
-                  <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-purple-400"></div>
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-600 mr-4 ml-2">
-                      <ListFilter className="h-5 w-5" />
-                    </div>
-                    <span className="text-gray-900 font-medium">DeFi Strategies</span>
-                  </div>
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600 font-bold text-sm">
-                    2
-                  </div>
-                </div>
-              </div>
-
-              {/* Step 3: Pick One */}
-              <div className="relative mb-8">
-                <div className="absolute left-1/2 bottom-0 w-0.5 h-8 bg-purple-200 -translate-x-1/2 translate-y-full"></div>
-                <div className="bg-white rounded-2xl shadow-lg p-4 w-72 mx-auto flex items-center border border-purple-100 relative overflow-hidden group hover:shadow-xl transition-all duration-300">
-                  <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-orange-400"></div>
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-600 mr-4 ml-2">
-                      <ListFilter className="h-5 w-5" />
-                    </div>
-                    <span className="text-gray-900 font-medium">Pick One</span>
-                  </div>
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg bg-orange-50 flex items-center justify-center text-orange-600 font-bold text-sm">
-                    3
-                  </div>
-                </div>
-              </div>
-
-              {/* Step 4: Invest */}
-              <div className="relative mb-8">
-                <div className="absolute left-1/2 bottom-0 w-0.5 h-8 bg-purple-200 -translate-x-1/2 translate-y-full"></div>
-                <div className="bg-white rounded-2xl shadow-lg p-4 w-72 mx-auto flex items-center border border-purple-100 relative overflow-hidden group hover:shadow-xl transition-all duration-300">
-                  <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-green-400"></div>
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-600 mr-4 ml-2">
-                      <Wallet className="h-5 w-5" />
-                    </div>
-                    <span className="text-gray-900 font-medium">Invest</span>
-                  </div>
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg bg-green-50 flex items-center justify-center text-green-600 font-bold text-sm">
-                    4
-                  </div>
-                </div>
-              </div>
-
-              {/* Earn */}
-              <div className="relative">
-                <div className="bg-white rounded-2xl shadow-lg p-4 w-40 mx-auto text-center flex items-center justify-center gap-2 text-gray-900 border border-purple-100 hover:shadow-xl transition-all duration-300">
-                  <Wallet className="h-4 w-4" />
-                  <span className="font-medium">Earn</span>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
-
-        {/* Footer */}
-        <footer className="text-center text-xs md:text-sm text-gray-500 mt-12 md:mt-16 pb-4">
-          <p>© 2025 Synthos. All rights reserved.</p>
-        </footer>
       </div>
+      <footer className="fixed bottom-0 left-0 right-0 bg-gray-100/90 backdrop-blur-sm border-t-2 border-gray-300 z-50">
+        <div className="container mx-auto px-4 py-3">
+          <p className="text-center text-xs md:text-sm text-gray-500">
+            © 2025 Synthos. All rights reserved.
+          </p>
+        </div>
+      </footer>
     </div>
-  )
+  );
 }
