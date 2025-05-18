@@ -1,22 +1,23 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
+import { useRef } from "react";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { ArrowLeft, ArrowRight } from "lucide-react"
-import { toast } from "@/components/ui/use-toast"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import { toast } from "@/components/ui/use-toast";
 
 interface OccupationFormProps {
-  occupation: string
-  setOccupation: (value: string) => void
-  customOccupation: string
-  setCustomOccupation: (value: string) => void
-  onSubmit: (e: React.FormEvent) => void
-  onBack: () => void
-  isSubmitting: boolean
+  occupation: string;
+  setOccupation: (value: string) => void;
+  customOccupation: string;
+  setCustomOccupation: (value: string) => void;
+  onSubmit: (e: React.FormEvent) => void;
+  onBack: () => void;
+  isSubmitting: boolean;
 }
 
 const occupations = [
@@ -27,9 +28,7 @@ const occupations = [
   { value: "business_owner", label: "Business Owner" },
   { value: "student", label: "Student" },
   { value: "other", label: "Other" },
-
-  
-]
+];
 
 export default function OccupationForm({
   occupation,
@@ -40,28 +39,32 @@ export default function OccupationForm({
   onBack,
   isSubmitting,
 }: OccupationFormProps) {
+  const formRef = useRef<HTMLFormElement>(null);
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!occupation) {
-      // Add haptic feedback
-      if (navigator.vibrate) {
-        navigator.vibrate(200)
+      if (formRef.current) {
+        formRef.current.classList.remove("animate-shake");
+        // Force reflow to restart animation
+        void formRef.current.offsetWidth;
+        formRef.current.classList.add("animate-shake");
       }
-      
+
       toast({
         title: "Please select an occupation",
         description: "Select your occupation or choose 'Other' to specify",
         variant: "destructive",
         duration: 3000,
-      })
-      return
+      });
+      return;
     }
 
     if (occupation === "other" && !customOccupation.trim()) {
-      // Add haptic feedback
-      if (navigator.vibrate) {
-        navigator.vibrate(200)
+      if (formRef.current) {
+        formRef.current.classList.remove("animate-shake");
+        void formRef.current.offsetWidth;
+        formRef.current.classList.add("animate-shake");
       }
 
       toast({
@@ -69,42 +72,51 @@ export default function OccupationForm({
         description: "Enter your occupation in the field provided",
         variant: "destructive",
         duration: 3000,
-      })
-      return
+      });
+      return;
     }
 
-    onSubmit(e)
-  }
+    onSubmit(e);
+  };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
+    <form
+      ref={formRef}
+      onSubmit={handleSubmit}
+      className="space-y-4 md:space-y-6"
+    >
       <div className="space-y-3 md:space-y-4">
-        <Label htmlFor="occupation" className="text-sm font-medium text-gray-700">
+        <Label
+          htmlFor="occupation"
+          className="text-sm font-medium text-gray-700"
+        >
           What is your occupation?
         </Label>
-        <RadioGroup 
-          id="occupation" 
-          value={occupation} 
+        <RadioGroup
+          id="occupation"
+          value={occupation}
           onValueChange={(value) => {
-            setOccupation(value)
+            setOccupation(value);
             // Clear custom occupation when switching away from "other"
             if (value !== "other") {
-              setCustomOccupation("")
+              setCustomOccupation("");
             }
-          }} 
+          }}
           className="space-y-2 md:space-y-3"
         >
           {occupations.map((item) => (
             <div key={item.value} className="flex items-center space-x-3">
-              <RadioGroupItem 
-                value={item.value} 
-                id={item.value} 
-                className="text-gray-900 border-gray-400" 
+              <RadioGroupItem
+                value={item.value}
+                id={item.value}
+                className="text-gray-900 border-gray-400"
               />
-              <Label 
-                htmlFor={item.value} 
+              <Label
+                htmlFor={item.value}
                 className={`cursor-pointer text-sm md:text-base ${
-                  occupation === item.value ? 'text-gray-900 font-medium' : 'text-gray-500'
+                  occupation === item.value
+                    ? "text-gray-900 font-medium"
+                    : "text-gray-500"
                 }`}
               >
                 {item.label}
@@ -145,5 +157,5 @@ export default function OccupationForm({
         </Button>
       </div>
     </form>
-  )
+  );
 }

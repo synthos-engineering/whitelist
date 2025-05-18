@@ -1,22 +1,23 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
+import { useRef } from "react";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { ArrowLeft, ArrowRight } from "lucide-react"
-import { toast } from "@/components/ui/use-toast"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import { toast } from "@/components/ui/use-toast";
 
 interface PlatformFormProps {
-  platform: string
-  setPlatform: (value: string) => void
-  customPlatform: string
-  setCustomPlatform: (value: string) => void
-  onSubmit: (e: React.FormEvent) => void
-  onBack: () => void
-  isSubmitting: boolean
+  platform: string;
+  setPlatform: (value: string) => void;
+  customPlatform: string;
+  setCustomPlatform: (value: string) => void;
+  onSubmit: (e: React.FormEvent) => void;
+  onBack: () => void;
+  isSubmitting: boolean;
 }
 
 const platforms = [
@@ -28,7 +29,7 @@ const platforms = [
   { value: "youtube", label: "YouTube" },
   { value: "email", label: "Email Marketing" },
   { value: "other", label: "Other" },
-]
+];
 
 export default function PlatformForm({
   platform,
@@ -39,73 +40,80 @@ export default function PlatformForm({
   onBack,
   isSubmitting,
 }: PlatformFormProps) {
+  const formRef = useRef<HTMLFormElement>(null);
   const validateForm = () => {
     if (!platform) {
-      // Add haptic feedback
-      if (navigator.vibrate) {
-        navigator.vibrate(200)
+      if (formRef.current) {
+        formRef.current.classList.remove("animate-shake");
+        // Force reflow to restart animation
+        void formRef.current.offsetWidth;
+        formRef.current.classList.add("animate-shake");
       }
-
       toast({
         title: "Please select a platform",
-        description: "Select your preferred platform or choose 'Other' to specify",
+        description:
+          "Select your preferred platform or choose 'Other' to specify",
         variant: "destructive",
         duration: 3000,
-      })
-      return false
+      });
+      return false;
     }
 
     if (platform === "other" && !customPlatform.trim()) {
-      // Add haptic feedback
-      if (navigator.vibrate) {
-        navigator.vibrate(200)
+      if (formRef.current) {
+        formRef.current.classList.remove("animate-shake");
+        void formRef.current.offsetWidth;
+        formRef.current.classList.add("animate-shake");
       }
-
       toast({
         title: "Please specify your platform",
         description: "Enter your preferred platform in the field provided",
         variant: "destructive",
         duration: 3000,
-      })
-      return false
+      });
+      return false;
     }
 
-    return true
-  }
+    return true;
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    
+    e.preventDefault();
+
     if (!validateForm()) {
-      return
+      return;
     }
 
-    onSubmit(e)
-  }
+    onSubmit(e);
+  };
 
   const handleBack = () => {
     // Clear the form state when going back
-    setPlatform("")
-    setCustomPlatform("")
-    onBack()
-  }
+    setPlatform("");
+    setCustomPlatform("");
+    onBack();
+  };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
+    <form
+      ref={formRef}
+      onSubmit={handleSubmit}
+      className="space-y-4 md:space-y-6"
+    >
       <div className="space-y-3 md:space-y-4">
         <Label htmlFor="platform" className="text-sm font-medium text-gray-700">
           Which platform would you like to use the most?
         </Label>
-        <RadioGroup 
-          id="platform" 
-          value={platform} 
+        <RadioGroup
+          id="platform"
+          value={platform}
           onValueChange={(value) => {
-            setPlatform(value)
+            setPlatform(value);
             // Clear custom platform when switching away from "other"
             if (value !== "other") {
-              setCustomPlatform("")
+              setCustomPlatform("");
             }
-          }} 
+          }}
           className="space-y-2 md:space-y-3"
         >
           {platforms.map((item) => (
@@ -115,10 +123,12 @@ export default function PlatformForm({
                 id={`platform-${item.value}`}
                 className="text-gray-900 border-gray-400"
               />
-              <Label 
-                htmlFor={`platform-${item.value}`} 
+              <Label
+                htmlFor={`platform-${item.value}`}
                 className={`cursor-pointer text-sm md:text-base ${
-                  platform === item.value ? 'text-gray-900 font-medium' : 'text-gray-500'
+                  platform === item.value
+                    ? "text-gray-900 font-medium"
+                    : "text-gray-500"
                 }`}
               >
                 {item.label}
@@ -155,9 +165,10 @@ export default function PlatformForm({
           disabled={isSubmitting}
           className="bg-purple-600 hover:bg-purple-700 text-white px-3 md:px-6 py-2 rounded-lg transition-all duration-300 hover:translate-y-[-2px] hover:shadow-md text-sm md:text-base"
         >
-          {isSubmitting ? "Submitting..." : "Submit"} {!isSubmitting && <ArrowRight className="ml-1 md:ml-2 h-4 w-4" />}
+          {isSubmitting ? "Submitting..." : "Submit"}{" "}
+          {!isSubmitting && <ArrowRight className="ml-1 md:ml-2 h-4 w-4" />}
         </Button>
       </div>
     </form>
-  )
+  );
 }

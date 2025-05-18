@@ -186,7 +186,9 @@ export default function LandingPage() {
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-100 rounded-full filter blur-3xl opacity-30 translate-y-1/2 -translate-x-1/3"></div>
       </div>
 
-      <Toaster />
+      <div className="toast-container">
+        <Toaster />
+      </div>
       <div className="container mx-auto px-4 relative z-10 min-h-screen flex flex-col justify-center">
         {/* Header */}
         <header className="fixed top-0 left-0 right-0 bg-gray-100/90 backdrop-blur-sm border-b-2 border-gray-300 z-50">
