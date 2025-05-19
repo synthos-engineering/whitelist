@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
-import connectDB from "@/app/lib/mongodb";
+import dbConnect from "@/app/lib/mongodb";
 import Waitlist from "@/app/models/Waitlist";
 
 // Create transporter with more detailed configuration
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
 
     // Connect to MongoDB
     try {
-      await connectDB();
+      await dbConnect();
     } catch (dbError) {
       console.error("Database connection error:", dbError);
       return NextResponse.json(

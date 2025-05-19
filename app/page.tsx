@@ -16,8 +16,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { toast } from "@/components/ui/use-toast";
-import { Toaster } from "@/components/ui/toaster";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import OccupationForm from "./components/occupation-form";
 import PlatformForm from "./components/platform-form";
 import {
@@ -26,7 +26,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
+import { ToastContainer } from "react-toastify";
 
 type FormStep = "email" | "occupation" | "platform" | "success";
 
@@ -41,11 +43,23 @@ export default function LandingPage() {
   const [mounted, setMounted] = useState(false);
   const [logoError, setLogoError] = useState(false);
   const [submittedEmail, setSubmittedEmail] = useState("");
+  const [remainingSpots, setRemainingSpots] = useState<number | null>(null);
   const formCardRef = useRef<HTMLDivElement>(null);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    // Fetch waitlist count
+    fetch("/api/waitlist-count")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.remainingSpots !== undefined) {
+          setRemainingSpots(data.remainingSpots);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching waitlist count:", error);
+      });
   }, []);
 
   const handleEmailSubmit = (e: React.FormEvent) => {
@@ -58,11 +72,7 @@ export default function LandingPage() {
         void formCardRef.current.offsetWidth;
         formCardRef.current.classList.add("animate-shake");
       }
-      toast({
-        title: "Invalid email",
-        description: "Please enter a valid email address",
-        variant: "destructive",
-      });
+      toast.error("Please enter a valid email address");
       return;
     }
 
@@ -74,20 +84,12 @@ export default function LandingPage() {
     e.preventDefault();
 
     if (!occupation) {
-      toast({
-        title: "Please select an occupation",
-        description: "Select your occupation or choose 'Other' to specify",
-        variant: "destructive",
-      });
+      toast.error("Please select an occupation or choose 'Other' to specify");
       return;
     }
 
     if (occupation === "other" && !customOccupation) {
-      toast({
-        title: "Please specify your occupation",
-        description: "Enter your occupation in the field provided",
-        variant: "destructive",
-      });
+      toast.error("Please enter your occupation in the field provided");
       return;
     }
 
@@ -99,21 +101,12 @@ export default function LandingPage() {
     e.preventDefault();
 
     if (!platform) {
-      toast({
-        title: "Please select a platform",
-        description:
-          "Select your preferred platform or choose 'Other' to specify",
-        variant: "destructive",
-      });
+      toast.error("Please select a platform or choose 'Other' to specify");
       return;
     }
 
     if (platform === "other" && !customPlatform) {
-      toast({
-        title: "Please specify your platform",
-        description: "Enter your preferred platform in the field provided",
-        variant: "destructive",
-      });
+      toast.error("Please enter your preferred platform in the field provided");
       return;
     }
 
@@ -139,31 +132,26 @@ export default function LandingPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || data.details || "Failed to submit");
+        // Show error message from the server as a toast
+        toast.error(data.error || "Failed to submit");
+        return;
       }
 
-      toast({
-        title: "Success!",
-        description:
-          "You've been added to our early access list. Check your email for confirmation!",
-      });
+      toast.success(
+        "You've been added to our early access list. Check your email for confirmation!"
+      );
 
       // Store the submitted email for the success screen
       setSubmittedEmail(email);
       setShowSuccessDialog(true);
 
       // Show additional toast
-      toast({
-        title: "Welcome to Synthos!",
-        description: "We're excited to have you join our early access program.",
-      });
+      toast.success(
+        "Welcome to Synthos! We're excited to have you join our early access program."
+      );
     } catch (error) {
       console.error("Submission error:", error);
-      toast({
-        title: "Connection Error",
-        description: "Unable to connect to the server. Please try again later.",
-        variant: "destructive",
-      });
+      toast.error("Unable to connect to the server. Please try again later.");
     } finally {
       setIsSubmitting(false);
     }
@@ -194,10 +182,19 @@ export default function LandingPage() {
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-100 rounded-full filter blur-3xl opacity-30 translate-y-1/2 -translate-x-1/3"></div>
       </div>
 
-      <div className="toast-container">
-        <Toaster />
-      </div>
       <div className="container mx-auto px-4 relative z-10 min-h-screen flex flex-col justify-center">
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
         {/* Header */}
         <header className="fixed top-0 left-0 right-0 bg-gray-100/90 backdrop-blur-sm border-b-2 border-gray-300 z-50">
           <div className="container mx-auto px-4 py-4 flex justify-between items-center">
@@ -253,19 +250,54 @@ export default function LandingPage() {
             {/* Main Heading and Subheading */}
             <div className="mb-10 md:mb-12">
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-                AI Agents for DeFi
+                Personalized DeFi Investing Made Simple
               </h1>
               <p className="text-lg md:text-xl text-gray-600">
-                Tailored investment strategies based on user preferences,
-                ensuring data privacy and verifiability.
+                No research, no stress.
               </p>
+              <p className="text-lg md:text-xl text-gray-600 mb-4">
+                SynthOS builds custom investment plans just for you.
+              </p>
+              {remainingSpots !== null && (
+                <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-purple-50 to-purple-100 rounded-full text-purple-700 shadow-sm border border-purple-100">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></div>
+                    <div className="flex gap-1 justify-center items-center">
+                      <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent">
+                        {remainingSpots}
+                      </span>
+                      <span className="text-sm font-semibold text-purple-600">
+                        spots remaining
+                      </span>
+                    </div>
+                  </div>
+                  <div className="h-4 w-px bg-purple-200"></div>
+                  <span className="text-xs text-purple-600">
+                    Join the waitlist now!
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Form Card */}
             <div
               ref={formCardRef}
-              className="bg-white rounded-2xl shadow-xl border border-purple-100 p-5 md:p-8 transition-all duration-300 hover:shadow-2xl w-full"
+              className={`bg-white rounded-2xl shadow-xl border border-purple-100 p-5 md:p-8 transition-all duration-300 hover:shadow-2xl w-full relative ${
+                remainingSpots === 0 ? "pointer-events-none" : ""
+              }`}
             >
+              {remainingSpots === 0 && (
+                <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center rounded-2xl">
+                  <div className="text-center p-6">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                      Waitlist is Full
+                    </h3>
+                    <p className="text-gray-600">
+                      Please wait for our public beta release.
+                    </p>
+                  </div>
+                </div>
+              )}
               {currentStep !== "success" ? (
                 <>
                   {/* Form Progress Indicator */}
@@ -398,60 +430,51 @@ export default function LandingPage() {
       <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-center text-2xl font-bold text-gray-900">
-              Thank You!
+            <DialogTitle className="text-center text-2xl font-semibold text-gray-900">
+              Success! 🎉
             </DialogTitle>
-            <DialogDescription className="text-center">
+            <div className="text-center">
               <div className="w-16 h-16 md:w-20 md:h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
                 <CheckCircle className="w-10 h-10 md:w-12 md:h-12 text-green-600" />
               </div>
-              <p className="text-gray-600 mb-6 max-w-md mx-auto">
+              <div className="text-gray-600 mb-6 max-w-md mx-auto">
                 We've added{" "}
                 <span className="text-gray-900 font-medium">
                   {submittedEmail}
                 </span>{" "}
-                to our early access list. We'll notify you when Synthos
-                launches.
-              </p>
+                to our waitlist. We'll notify you when we launch!
+              </div>
               <div className="space-y-4 w-full max-w-sm mx-auto">
                 <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">
+                  <div className="text-sm font-medium text-gray-700 mb-2">
                     Spread the Word! 🚀
-                  </h4>
+                  </div>
                   <div className="flex flex-col gap-3">
-                    <Link
-                      href={`https://twitter.com/intent/tweet?text=I just joined the waitlist for Synthos - AI Agents for DeFi! Join me: https://synthos.ai`}
+                    <a
+                      href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
+                        "I just joined the waitlist for SynthOS! Join me and be among the first to experience the future of DeFi. 🚀\n\n"
+                      )}&url=${encodeURIComponent(
+                        "https://synthos-engineering.com"
+                      )}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="bg-white hover:bg-purple-50 p-2 rounded-md transition-colors flex items-center gap-2"
+                      className="flex items-center justify-center gap-2 bg-[#1DA1F2] text-white px-4 py-2 rounded-lg hover:bg-[#1a8cd8] transition-colors"
                     >
-                      <Twitter className="w-5 h-5 text-purple-600" />
-                      <span className="text-sm text-gray-700">Share on X</span>
-                    </Link>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-700">
-                        Be with the ALPHA:
-                      </span>
-                      <Link
-                        href="https://t.me/+VQtBZ5QIoacxZjZl"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bg-white hover:bg-purple-50 p-2 rounded-md transition-colors flex items-center gap-2"
-                      >
-                        <Send className="w-5 h-5 text-purple-600" />
-                        <span className="text-sm text-gray-700">Telegram</span>
-                      </Link>
-                    </div>
+                      <Twitter className="w-5 h-5" />
+                      Share on Twitter
+                    </a>
                   </div>
                 </div>
-                <Button
-                  onClick={resetForm}
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg transition-all duration-300"
-                >
-                  Sign up with another email
-                </Button>
               </div>
-            </DialogDescription>
+            </div>
+            <DialogFooter className="mt-6">
+              <Button
+                onClick={resetForm}
+                className="w-full bg-gray-900 hover:bg-gray-800"
+              >
+                Sign up with another email
+              </Button>
+            </DialogFooter>
           </DialogHeader>
         </DialogContent>
       </Dialog>
