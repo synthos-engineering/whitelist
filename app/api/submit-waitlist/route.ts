@@ -105,7 +105,6 @@ export async function POST(request: Request) {
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: white; color: #333;">
           <div style="text-align: center; margin-bottom: 30px;">
             <h1 style="color: #333; font-size: 28px; margin-bottom: 10px;">Welcome to SynthOS! 🚀</h1>
-            <p style="color: #666; font-size: 16px;">AI Agents for DeFi</p>
           </div>
           
           <div style="background-color: #f9f5ff; padding: 24px; border-radius: 12px; margin-bottom: 24px; border: 1px solid #e9d5ff;">
