@@ -40,6 +40,8 @@ export default function OccupationForm({
   isSubmitting,
 }: OccupationFormProps) {
   const formRef = useRef<HTMLFormElement>(null);
+  const firstRadioRef = useRef<HTMLButtonElement>(null);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -49,6 +51,8 @@ export default function OccupationForm({
         // Force reflow to restart animation
         void formRef.current.offsetWidth;
         formRef.current.classList.add("animate-shake");
+        // Focus on the first radio button
+        firstRadioRef.current?.focus();
       }
 
       toast({
@@ -104,11 +108,12 @@ export default function OccupationForm({
           }}
           className="space-y-2 md:space-y-3"
         >
-          {occupations.map((item) => (
+          {occupations.map((item, index) => (
             <div key={item.value} className="flex items-center space-x-3">
               <RadioGroupItem
                 value={item.value}
                 id={item.value}
+                ref={index === 0 ? firstRadioRef : undefined}
                 className="text-gray-900 border-gray-400"
               />
               <Label
