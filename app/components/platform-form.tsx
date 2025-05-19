@@ -95,12 +95,8 @@ export default function PlatformForm({
   };
 
   return (
-    <form
-      ref={formRef}
-      onSubmit={handleSubmit}
-      className="space-y-4 md:space-y-6"
-    >
-      <div className="space-y-3 md:space-y-4">
+    <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-4">
         <Label htmlFor="platform" className="text-sm font-medium text-gray-700">
           Which platform would you like to use the most?
         </Label>
@@ -114,7 +110,7 @@ export default function PlatformForm({
               setCustomPlatform("");
             }
           }}
-          className="space-y-2 md:space-y-3"
+          className="space-y-3"
         >
           {platforms.map((item) => (
             <div key={item.value} className="flex items-center space-x-3">
@@ -125,7 +121,7 @@ export default function PlatformForm({
               />
               <Label
                 htmlFor={`platform-${item.value}`}
-                className={`cursor-pointer text-sm md:text-base ${
+                className={`cursor-pointer text-base ${
                   platform === item.value
                     ? "text-gray-900 font-medium"
                     : "text-gray-500"
@@ -144,7 +140,7 @@ export default function PlatformForm({
               placeholder="Please specify your preferred platform"
               value={customPlatform}
               onChange={(e) => setCustomPlatform(e.target.value)}
-              className="bg-white border-gray-200 focus:border-gray-400 h-10 md:h-12 text-gray-900 placeholder:text-gray-400 rounded-lg"
+              className="bg-white border-gray-200 focus:border-blue-500 h-12 text-gray-900 placeholder:text-gray-400 rounded-lg"
               required={platform === "other"}
             />
           </div>
@@ -156,17 +152,17 @@ export default function PlatformForm({
           type="button"
           variant="outline"
           onClick={handleBack}
-          className="border-gray-200 text-gray-700 hover:bg-gray-100 px-3 md:px-6 py-2 rounded-lg transition-all duration-300 text-sm md:text-base"
+          className="border-gray-200 text-gray-700 hover:bg-gray-100 px-6 py-2 rounded-lg transition-all duration-300"
         >
-          <ArrowLeft className="mr-1 md:mr-2 h-4 w-4" /> Back
+          <ArrowLeft className="mr-2 h-4 w-4" /> Back
         </Button>
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="bg-purple-600 hover:bg-purple-700 text-white px-3 md:px-6 py-2 rounded-lg transition-all duration-300 hover:translate-y-[-2px] hover:shadow-md text-sm md:text-base"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-all duration-300 hover:translate-y-[-2px] hover:shadow-md"
         >
           {isSubmitting ? "Submitting..." : "Submit"}{" "}
-          {!isSubmitting && <ArrowRight className="ml-1 md:ml-2 h-4 w-4" />}
+          {!isSubmitting && <ArrowRight className="ml-2 h-4 w-4" />}
         </Button>
       </div>
     </form>
