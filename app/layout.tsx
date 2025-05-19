@@ -7,7 +7,7 @@ import "./globals.css"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Synthos - AI Agents for DEFI",
+  title: "SynthOS",
   description: "Tailored investment strategies based on user preferences, ensuring data privacy and verifiability.",
     generator: 'v0.dev'
 }

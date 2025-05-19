@@ -13,6 +13,7 @@ import {
   ListFilter,
   Wallet,
   CheckCircle,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -216,9 +217,9 @@ export default function LandingPage() {
                   />
                 </div>
               )}
-              <span className="text-xl md:text-2xl font-bold text-gray-900">
-                Synthos
-              </span>
+              <Link href="/" className="flex items-center">
+                <span className="ml-2 font-bold text-xl">SynthOS</span>
+              </Link>
             </div>
 
             {/* Social Media Links */}
@@ -228,9 +229,11 @@ export default function LandingPage() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-purple-600 hover:text-purple-700 transition-colors"
-                aria-label="Twitter"
+                aria-label="X"
               >
-                <Twitter className="w-5 h-5" />
+                <svg width="20" height="18" viewBox="0 0 300 271" fill="#9333ea" xmlns="http://www.w3.org/2000/svg">
+                  <path d="m236 0h46l-101 115 118 156h-92.6l-72.5-94.8-83 94.8h-46l107-123-113-148h94.9l65.5 86.6zm-16.1 244h25.5l-165-218h-27.4z"/>
+                </svg>
               </Link>
               <Link
                 href="https://t.me/+x8mewakKNJNmY2Nl"
@@ -245,8 +248,8 @@ export default function LandingPage() {
           </div>
         </header>
 
-        <div className="grid max-w-2xl mx-auto w-full mt-24">
-          <div className="flex flex-col items-center text-center">
+        <div className="grid max-w-2xl mx-auto w-full">
+          <div className="flex flex-col items-center text-center py-[120px]">
             {/* Main Heading and Subheading */}
             <div className="mb-10 md:mb-12">
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
@@ -260,8 +263,7 @@ export default function LandingPage() {
               </p>
               {remainingSpots !== null && (
                 <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-purple-50 to-purple-100 rounded-full text-purple-700 shadow-sm border border-purple-100">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></div>
+                  <div className="items-center">
                     <div className="flex gap-1 justify-center items-center">
                       <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent">
                         {remainingSpots}
@@ -453,15 +455,24 @@ export default function LandingPage() {
                     <a
                       href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
                         "I just joined the waitlist for SynthOS! Join me and be among the first to experience the future of DeFi. 🚀\n\n"
-                      )}&url=${encodeURIComponent(
-                        "https://synthos-engineering.com"
-                      )}`}
+                      )}&url=${encodeURIComponent("https://synthos-engineering.com")}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 bg-[#1DA1F2] text-white px-4 py-2 rounded-lg hover:bg-[#1a8cd8] transition-colors"
+                      className="flex items-center justify-center gap-2 bg-black text-white px-4 py-2 rounded-lg hover:bg-neutral-800 transition-colors"
                     >
-                      <Twitter className="w-5 h-5" />
-                      Share on Twitter
+                      <svg width="20" height="18" viewBox="0 0 300 271" fill="white" xmlns="http://www.w3.org/2000/svg">
+                        <path d="m236 0h46l-101 115 118 156h-92.6l-72.5-94.8-83 94.8h-46l107-123-113-148h94.9l65.5 86.6zm-16.1 244h25.5l-165-218h-27.4z"/>
+                      </svg>
+                      Share on X
+                    </a>
+                    <a
+                      href="https://t.me/+x8mewakKNJNmY2Nl"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 bg-[#229ED9] text-white px-4 py-2 rounded-lg hover:bg-[#1787b7] transition-colors"
+                    >
+                      <Send className="w-5 h-5" />
+                      Join Telegram
                     </a>
                   </div>
                 </div>
