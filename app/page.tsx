@@ -267,7 +267,7 @@ export default function LandingPage() {
       </main>
       {/* Success Dialog */}
       <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-        <DialogContent className="sm:max-w-md bg-purple-200 text-black p-0 overflow-hidden rounded-2xl border border-gray-800 shadow-xl">
+        <DialogContent className="sm:max-w-md bg-purple-100 text-black p-0 overflow-hidden rounded-2xl border border-gray-800 shadow-xl">
           <DialogTitle className="sr-only">Waitlist Confirmation</DialogTitle>
           <div className="p-6">
             <div className="flex justify-center mb-6">
@@ -285,7 +285,7 @@ export default function LandingPage() {
                 ? "Your email is already whitelisted earlier. We'll let you know when SynthOS is ready."
                 : "You’ll hear from us when SynthOS goes live, be sure to check your inbox and spam folder!"}
             </p>
-            <div className="bg-purple-300 rounded-xl p-4 mb-6 border border-gray-700">
+            <div className="bg-purple-300/50 rounded-xl p-4 mb-6 border border-gray-700">
               <div className="flex items-center">
                 <Mail className="h-5 w-5 text-purple-400 mr-3" />
                 <span className="text-purple-900 font-medium">
