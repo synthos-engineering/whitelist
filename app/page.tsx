@@ -282,7 +282,7 @@ export default function LandingPage() {
             <p className="text-center text-purple-600 mb-6">
               {isAlreadyRegistered
                 ? "Your email is already whitelisted earlier. We'll let you know when SynthOS is ready."
-                : "You’ll hear from us when SynthOS goes live, be sure to check your inbox and spam folder!"}
+                : "You'll hear from us when SynthOS goes live, be sure to check your inbox and spam folder!"}
             </p>
             <div className="bg-purple-300/50 rounded-xl p-4 mb-6 ">
               <div className="flex items-center">
@@ -314,6 +314,24 @@ export default function LandingPage() {
                   <path d="M22 2 11 13" />
                 </svg>
                 Join our Telegram Group
+              </a>
+
+              <a
+                href="https://x.com/SynthOS__"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 bg-black text-white px-4 py-3 rounded-lg hover:bg-gray-600 transition-colors mt-4 w-full"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 300 271"
+                  fill="currentColor"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="m236 0h46l-101 115 118 156h-92.6l-72.5-94.8-83 94.8h-46l107-123-113-148h94.9l65.5 86.6zm-16.1 244h25.5l-165-218h-27.4z" />
+                </svg>
+                Join our X
               </a>
             </div>
             <Button
