@@ -285,7 +285,7 @@ export default function LandingPage() {
                 ? "Your email is already whitelisted earlier. We'll let you know when SynthOS is ready."
                 : "You’ll hear from us when SynthOS goes live, be sure to check your inbox and spam folder!"}
             </p>
-            <div className="bg-purple-300/50 rounded-xl p-4 mb-6 border border-gray-700">
+            <div className="bg-purple-300/50 rounded-xl p-4 mb-6 ">
               <div className="flex items-center">
                 <Mail className="h-5 w-5 text-purple-400 mr-3" />
                 <span className="text-purple-900 font-medium">
