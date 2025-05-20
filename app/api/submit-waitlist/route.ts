@@ -47,8 +47,8 @@ export async function POST(request: Request) {
       const existingEntry = await Waitlist.findOne({ email });
       if (existingEntry) {
         return NextResponse.json(
-          { error: "This email is already registered" },
-          { status: 400 }
+          { success: true, alreadyRegistered: true },
+          { status: 200 }
         );
       }
     } catch (queryError) {

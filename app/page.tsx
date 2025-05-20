@@ -19,7 +19,12 @@ import "react-toastify/dist/ReactToastify.css";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { ToastContainer } from "react-toastify";
 
-const updates = [];
+interface Update {
+  date: string;
+  content: string;
+}
+
+const updates: Update[] = [];
 
 export default function LandingPage() {
   const [email, setEmail] = useState("");
@@ -31,6 +36,7 @@ export default function LandingPage() {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [showUpdates, setShowUpdates] = useState(false);
   const [showAllUpdates, setShowAllUpdates] = useState(false);
+  const [isAlreadyRegistered, setIsAlreadyRegistered] = useState(false);
 
   useEffect(() => {
     fetch("/api/waitlist-count")
@@ -67,7 +73,9 @@ export default function LandingPage() {
         toast.error(data.error || "Failed to submit");
         return;
       }
+      
       setSubmittedEmail(email);
+      setIsAlreadyRegistered(data.alreadyRegistered || false);
       setShowSuccessDialog(true);
     } catch (error) {
       toast.error("Unable to connect to the server. Please try again later.");
@@ -79,6 +87,7 @@ export default function LandingPage() {
   const resetForm = () => {
     setEmail("");
     setName("");
+    setIsAlreadyRegistered(false);
     setShowSuccessDialog(false);
   };
 
@@ -253,12 +262,12 @@ export default function LandingPage() {
         )}
         {/* Footer */}
         <footer className="w-full text-center text-sm text-gray-500 mt-8 border-t border-gray-200 pt-6">
-          <p>© 2024 SynthOS. All rights reserved.</p>
+          <p>© 2025 SynthOS. All rights reserved.</p>
         </footer>
       </main>
       {/* Success Dialog */}
       <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-        <DialogContent className="sm:max-w-md bg-[#18181c] text-white p-0 overflow-hidden rounded-2xl border border-gray-800 shadow-xl">
+        <DialogContent className="sm:max-w-md bg-purple-200 text-black p-0 overflow-hidden rounded-2xl border border-gray-800 shadow-xl">
           <DialogTitle className="sr-only">Waitlist Confirmation</DialogTitle>
           <div className="p-6">
             <div className="flex justify-center mb-6">
@@ -266,16 +275,20 @@ export default function LandingPage() {
                 <CheckCircle className="h-10 w-10 text-green-500" />
               </div>
             </div>
-            <h2 className="text-center text-2xl font-semibold mb-2 text-white">
-              We've added you to our waitlist!
+            <h2 className="text-center text-2xl font-semibold mb-2 text-purple-900">
+              {isAlreadyRegistered
+                ? "Thanks for your interest! "
+                : "We've added you to our waitlist!"}
             </h2>
-            <p className="text-center text-gray-300 mb-6">
-              We'll let you know when SynthOS is ready.
+            <p className="text-center text-purple-600 mb-6">
+              {isAlreadyRegistered
+                ? "Your email is already whitelisted earlier. We'll let you know when SynthOS is ready."
+                : "You’ll hear from us when SynthOS goes live, be sure to check your inbox and spam folder!"}
             </p>
-            <div className="bg-[#23232a] rounded-xl p-4 mb-6 border border-gray-700">
+            <div className="bg-purple-300 rounded-xl p-4 mb-6 border border-gray-700">
               <div className="flex items-center">
-                <Mail className="h-5 w-5 text-gray-400 mr-3" />
-                <span className="text-gray-100 font-medium">
+                <Mail className="h-5 w-5 text-purple-400 mr-3" />
+                <span className="text-purple-900 font-medium">
                   {submittedEmail}
                 </span>
               </div>
