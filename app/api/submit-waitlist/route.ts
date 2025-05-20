@@ -112,14 +112,6 @@ export async function POST(request: Request) {
               Thank you for joining our waitlist! We're excited to have you on board.
             </p>
 
-            <div style="background-color: #f3e8ff; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
-              <p style="color: #6b21a8; margin: 0 0 8px 0;">Your Details:</p>
-              <p style="color: #333; margin: 0; line-height: 1.6;">
-                • Occupation: ${occupation}<br>
-                • Preferred Platform: ${platform}
-              </p>
-            </div>
-
             <p style="color: #333; line-height: 1.6;">
               We'll keep you updated on our progress and let you know when early access becomes available.
             </p>
@@ -128,7 +120,7 @@ export async function POST(request: Request) {
           <div style="background-color: #f9f5ff; padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 24px; border: 1px solid #e9d5ff;">
             <p style="color: #6b21a8; margin: 0 0 12px 0;">Stay Connected</p>
             <div>
-              <a href="https://x.com/SynthOS__" style="display: inline-block; padding: 8px 20px; background-color: #9333ea; color: white; text-decoration: none; border-radius: 20px; margin: 0 8px;">Twitter</a>
+              <a href="https://x.com/SynthOS__" style="display: inline-block; padding: 8px 20px; background-color: #9333ea; color: white; text-decoration: none; border-radius: 20px; margin: 0 8px;">X</a>
               <a href="https://t.me/+x8mewakKNJNmY2Nl" style="display: inline-block; padding: 8px 20px; background-color: #9333ea; color: white; text-decoration: none; border-radius: 20px; margin: 0 8px;">Telegram</a>
             </div>
           </div>
